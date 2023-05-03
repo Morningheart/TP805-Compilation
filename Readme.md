@@ -1,46 +1,97 @@
-# Exemple minimaliste de d'analyseur syntaxique avec JFlex et Cup
+# TP Compilation : Génération de code pour un sous ensemble du langage λ-ada.
 
-Il s'agit ici de faire un analyseur syntaxique 
-pour reconnaitre des séquences des phrases simples 
-du type `<sujet> <verbe> <complement> <point>`.
+## Groupe : Pierre-Alexandre Pagin
 
+À partir de l'arbre abstrait construit lors du dernier TP, avec les outils JFlex et CUP, l'objectif consiste à générer du code pour la machine à registres décrite dans le cours, afin d'être en mesure d'exécuter les programmes reconnus par l'analyseur sur la machine à registres.
 
-[JFlex](https://jflex.de/) 
-est utilisé pour la génération de l'analyseur lexical.
+## Compte rendu
 
-[Cup](http://www2.cs.tum.edu/projects/cup/) pour la génération de l'analyseur syntaxique.
+J'ai couvert les deux exercices demandés.
+Le code source du compilateur se trouve dans le dossier src.
 
-## Analyseur lexical
+J'ai aussi vérifier que les exemples de code donné dans le sujet du TP précédent fonctionne bien avec le compilateur.
 
-La spécification de l'analyseur lexical est dans le fichier [src/main/jflex/Simple.jflex](src/main/jflex/Simple.jflex).
+Comme :
 
-Il permet de reconnaître un **sujet** (_il_ ou _elle_), 
-un **verbe** (_est_ ou _boit_), un **complément** 
-(_vite_, _bien_, _chaud_, _beau_, _belle_) ou un **point** (_.;!?_).
+```
+let prixHt = 200;
+let prixTtc =  prixHt * 119 / 100 .
+```
+Donne en résultat :
 
-À partir de cette spécification, JFlex génère le fichier java, 
-`build/generated/sources/jflex/main/java/fr/usmb/m1isc/compilation/simple/SimpleLexer.java` 
-qui contient l'analyseur lexical utilisé en entrée 
-de l'analyseur syntaxique.
+```
+DATA SEGMENT
+	prixHt DD
+	prixTtc DD
+DATA ENDS
+CODE SEGMENT
+	mov eax, 200
+	mov prixHt, eax
+	mov eax, prixHt
+	push eax
+	mov eax, 119
+	pop ebx
+	mul eax, ebx
+	push eax
+	mov eax, 100
+	pop ebx
+	div ebx, eax
+	mov eax, ebx
+	mov prixTtc, eax
+CODE ENDS
+```
+---
+Et que l'exemple du code du calcul de PGCD :
 
-## Analyseur syntaxique
-
-La spécification de l'analyseur syntaxique est dans le fichier [src/main/cup/Simple.cup](src/main/cup/Simple.cup).
-
-À partir de cette spécification, GNU Bison génère les fichiers, 
-`build/generated/sources/cup/main/java/fr/usmb/m1isc/compilation/simple/SimpleParser.java` (contient l'analyseur syntaxique) et 
-`build/generated/sources/cup/main/java/fr/usmb/m1isc/compilation/simple/SimpleParserSym.java` 
-(utilisé dans l'analyseur lexical pour renvoyer 
-les tokens (unités lexicales) attendus par l'analyseur syntaxique).
-
-## Construction du projet 
-
-Pour construire le projet (nécessite l'installation d'une JDK), 
-aller dans le dossier du projet puis exécuter 
-la commande `./gradelw build` ou `gradelw.bat build`. 
-
-
-
-
-
- 
+```
+let a = input;
+let b = input;
+while (0 < b)
+do (let aux=(a mod b); let a=b; let b=aux );
+output a
+.
+```
+Donne en résultat :
+```
+DATA SEGMENT
+	b DD
+	a DD
+	aux DD
+DATA ENDS
+CODE SEGMENT
+	in eax
+	mov a, eax
+	in eax
+	mov b, eax
+debut_while_1:
+	mov eax, 0
+	push eax
+	mov eax, b
+	pop ebx
+	sub eax,ebx
+	jle faux_gt_1
+	mov eax,1
+	jmp sortie_gt_1
+faux_gt_1:
+	mov eax,0
+sortie_gt_1:
+	jz sortie_while_1
+	mov eax, b
+	push eax
+	mov eax, a
+	pop ebx
+	mov ecx,eax
+	div ecx,ebx
+	mul ecx,ebx
+	sub eax,ecx
+	mov aux, eax
+	mov eax, b
+	mov a, eax
+	mov eax, aux
+	mov b, eax
+	jmp debut_while_1
+sortie_while_1:
+	mov eax, a
+	out eax
+CODE ENDS
+```
