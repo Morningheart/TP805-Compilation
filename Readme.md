@@ -2,8 +2,6 @@
 
 ## Groupe : Pierre-Alexandre Pagin
 
-À partir de l'arbre abstrait construit lors du dernier TP, avec les outils JFlex et CUP, l'objectif consiste à générer du code pour la machine à registres décrite dans le cours, afin d'être en mesure d'exécuter les programmes reconnus par l'analyseur sur la machine à registres.
-
 ## Compte rendu
 
 J'ai couvert les deux exercices demandés.
